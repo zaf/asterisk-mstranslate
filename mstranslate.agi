@@ -37,14 +37,13 @@ my $appid   = "";
 my $out_lang = "en";
 
 # Verbose debugging messages    #
-my $debug = 1;
+my $debug = 0;
 
 # ----------------------------- #
 
 my %AGI;
 my $text;
 my $in_lang;
-my @result;
 my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
 my $content = "text/plain";
 
