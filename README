@@ -1,0 +1,86 @@
+==============================================
+   Microsoft Translator script for Asterisk
+==============================================
+
+This script makes use of Microsoft Translator to translate
+text strings and return them as channel variables.
+
+------------
+Requirements
+------------
+Perl         The Perl Programming Language
+perl-libwww  The World-Wide Web library for Perl
+API Key (appid) from http://www.bing.com/developers/appids.aspx
+Internet access in order to contact MS and get the voice data.
+
+------------
+Installation
+------------
+To install copy mstrasnlate.agi to your agi-bin directory.
+Usually this is /var/lib/asterisk/agi-bin/
+To make sure check your /etc/asterisk/asterisk.conf file
+
+-----
+Usage
+-----
+agi(mstranslate.agi,"text",[target language],[source language]):
+ The text string will be send to MS Translator for translation to target language.
+ The translated text will be stored as a channel variable named 'mstranslation'.
+ The setting of source language is optional, if not set the tranlator engine
+ will try to auto detect it.
+
+--------
+Examples
+--------
+sample dialplan code for your extensions.conf
+
+;Translate a text string from english to french:
+exten => 1234,1,agi(mstranslate.agi,"This is some random text.",fr)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+;Translate from greek to german:
+exten => 1234,1,agi(mstranslate.agi,"Αυτό είναι ένα απλό τέστ στα ελληνικά.",de)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+;Translate from japanese to english:
+exten => 1234,1,agi(mstranslate.agi,"これは、日本の簡単なテストです。良い一日を。",en)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+;Translate string to many languages:
+exten => 1235,1,Set(MYTEXT="This is some random text for translation.")
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",it)
+exten => 1235,n,Verbose(1,In Italian: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",fr)
+exten => 1235,n,Verbose(1,In French: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",ja)
+exten => 1235,n,Verbose(1,In Japanese: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",es)
+exten => 1235,n,Verbose(1,In Spanish: ${mstranslation})
+
+
+-------------------
+Supported Languages
+-------------------
+Translation is possible between any two of these languages:
+ar		bg		ca
+zh-CHS		zh-CHT
+cs		da		nl
+en		et		fi
+fr		de		el
+ht		he		hi
+mww		hu		id
+it		ja		ko
+lv		lt		no
+pl		pt		ro
+ru		sk		sl
+es		sv		th
+tr		uk		vi
+
+-------
+License
+-------
+The MStranslate script for asterisk is distributed under the GNU General Public
+License v2. See COPYING for details.
