@@ -28,6 +28,9 @@ agi(mstranslate.agi,"text",[target language],[source language]):
  The translated text will be stored as a channel variable named 'mstranslation'.
  The setting of source language is optional, if not set the tranlator engine
  will try to auto detect it.
+ If both target language and source language are omitted the script performs language
+ detection on the given text string and returns the two-character language code
+ as the value of the channel variable 'mslang'
 
 --------
 Examples
@@ -59,6 +62,11 @@ exten => 1235,n,Verbose(1,In Japanese: ${mstranslation})
 
 exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",es)
 exten => 1235,n,Verbose(1,In Spanish: ${mstranslation})
+
+;Detect text language:
+exten => 1236,1,Set(MYTEXT="This is some random text for detection.")
+exten => 1236,n,agi(mstranslate.agi,"${MYTEXT}")
+exten => 1236,n,Verbose(1,Detected language: ${mslang})
 
 
 -------------------
