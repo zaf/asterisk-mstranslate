@@ -83,13 +83,13 @@ for ($AGI{arg_1}) {
 
 # Setting source and target language  #
 if (length($AGI{arg_2})) {
-	if ($AGI{arg_2} =~ /[a-zA-Z\-]*?/) {
+	if ($AGI{arg_2} =~ /[a-zA-Z\-]{2,}/) {
 		$out_lang = $AGI{arg_2};
 	} else {
 		die "$name Invalid output language setting.\n";
 	}
 	if (length($AGI{arg_3})) {
-		if ($AGI{arg_3} =~ /[a-zA-Z\-]*?/) {
+		if ($AGI{arg_3} =~ /[a-zA-Z\-]{2,}/) {
 			$in_lang = $AGI{arg_3};
 		} else {
 			warn "$name Invalid input language setting. Using auto-detect.\n";
@@ -113,7 +113,7 @@ if ($in_lang && $out_lang) {
 	$url .= "/Translate?text=$text&from=$in_lang&to=$out_lang&contentType=$content&appid=$appid";
 } elsif (!$in_lang && $out_lang) {
 	$url .= "/Translate?text=$text&to=$out_lang&contentType=$content&appid=$appid";
-} elsif (!$in_lang && !$out_lang) {
+} elsif (!$out_lang) {
 	$url .= "/Detect?text=$text&appid=$appid";
 }
 

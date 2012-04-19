@@ -50,7 +50,7 @@ lang_list() if (defined $options{v});
 
 # check if language settings are valid #
 if (defined $options{l}) {
-	if ($options{l} =~ /[a-zA-Z\-]*?/) {
+	if ($options{l} =~ /[a-zA-Z\-]{2,}/) {
 		$in_lang = $options{l};
 	} else {
 		say_msg("Invalid input language setting. Using auto-detect.");
@@ -58,10 +58,14 @@ if (defined $options{l}) {
 }
 
 if (defined $options{o}) {
-	$out_lang = $options{o} if ($options{o} =~ /[a-zA-Z\-]*?/);
+	if ($options{o} =~ /[a-zA-Z\-]{2,}/) {
+		$out_lang = $options{o};
+	} else {
+		say_msg("Invalid output language setting. Aborting.");
+		exit 1;
+	}
 } else {
-	say_msg("Invalid output language setting. Aborting.");
-	exit 1;
+	print "Performing language detection.\n" if (!defined $options{q});
 }
 
 # Get input text #
@@ -96,11 +100,14 @@ $ua->agent("Mozilla/5.0 (X11; Linux; rv:8.0) Gecko/20100101");
 $ua->env_proxy;
 $ua->timeout($timeout);
 
-if ($in_lang) {
+if ($in_lang && $out_lang) {
 	$url .= "/Translate?text=$input&from=$in_lang&to=$out_lang&contentType=$content&appid=$appid";
-} else {
+} elsif (!$in_lang && $out_lang) {
 	$url .= "/Translate?text=$input&to=$out_lang&contentType=$content&appid=$appid";
+} elsif (!$out_lang) {
+	$url .= "/Detect?text=$input&appid=$appid";
 }
+
 $request = HTTP::Request->new('GET' => "$url");
 $response = $ua->request($request);
 if (!$response->is_success) {
@@ -132,7 +139,8 @@ sub VERSION_MESSAGE {
 		 " -h             this help message\n",
 		 " -v             suppoted languages list\n\n",
 		 "Examples:\n",
-		 "$0 -l en -o fr -t \"Hello world\"\n Translate \"Hello world\" in French.\n\n";
+		 "$0 -o fr -t \"Hello world\"\n\tTranslate \"Hello world\" in French.\n",
+		 "$0 -t \"Salut tout le monde\"\n\tDetect the language of the text string.\n\n";
 	exit 1;
 }
 
@@ -144,7 +152,6 @@ sub lang_list {
 	$request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
 	$response = $ua->request($request);
 	if ($response->is_success) {
-		print $response->content;
 		print "Supported languages list:\n",
 			join("\n", grep(/[a-zA-Z\-]{2,}/, split(/<.+?>|<\/.+?>/,$response->content))), "\n";
 	} else {
