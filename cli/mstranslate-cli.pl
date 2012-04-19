@@ -144,8 +144,9 @@ sub lang_list {
 	$request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
 	$response = $ua->request($request);
 	if ($response->is_success) {
+		print $response->content;
 		print "Supported languages list:\n",
-			join("\n", grep(/[a-z\-]{2,}/, split(/<.+?>|<\/.+?>/,$response->content))), "\n";
+			join("\n", grep(/[a-zA-Z\-]{2,}/, split(/<.+?>|<\/.+?>/,$response->content))), "\n";
 	} else {
 		say_msg("Failed to fetch language list.");
 	}
