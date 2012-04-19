@@ -143,12 +143,11 @@ sub lang_list {
 	$ua->timeout($timeout);
 	$request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
 	$response = $ua->request($request);
-	if (!$response->is_success) {
-		say_msg("Failed to fetch language list.");
+	if ($response->is_success) {
+		print "Supported languages list:\n",
+			join("\n", grep(/[a-z\-]{2,}/, split(/<.+?>|<\/.+?>/,$response->content))), "\n";
 	} else {
-		my @list = split(/<string>([a-zA-Z\-]*?)<\/string>/,$response->content);
-		print "$_\t" foreach (@list[1..($#list-1)]);
-		print "\n";
+		say_msg("Failed to fetch language list.");
 	}
 	exit 1;
 }
