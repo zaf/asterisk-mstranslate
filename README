@@ -10,8 +10,14 @@ Requirements
 ------------
 Perl         The Perl Programming Language
 perl-libwww  The World-Wide Web library for Perl
-API Key (appid) from http://www.bing.com/developers/appids.aspx
-Internet access in order to contact MS and get the voice data.
+Internet access in order to contact MS and get the language data.
+
+In order to use this script you have to subscribe to the Microsoft
+Translator API on Azure Marketplace:
+https://datamarket.azure.com/developer/applications/
+
+Existing API Keys from http://www.bing.com/developers/appids.aspx
+still work but they are considered deprecated and this method is no longer supported.
 
 ------------
 Installation

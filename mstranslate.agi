@@ -21,7 +21,13 @@
 # detection on the given text string and returns the two-character language code
 # as the value of the channel variable 'mslang'
 #
-# An API Key (appid) from http://www.bing.com/developers/appids.aspx is required.
+# In order to use this script you have to subscribe to the Microsoft
+# Translator API on Azure Marketplace:
+# https://datamarket.azure.com/developer/applications/
+#
+# Existing API Keys from http://www.bing.com/developers/appids.aspx
+# still work but they are considered deprecated and this method
+# is no longer supported.
 #
 
 use warnings;
@@ -30,21 +36,27 @@ use CGI::Util qw(escape);
 use LWP::UserAgent;
 $| = 1;
 
-# ----------------------------- #
-#   User defined parameters:    #
-# ----------------------------- #
-#  App ID from MS               #
+# ----------------------------------- #
+#   User defined parameters:          #
+# ----------------------------------- #
+# Your Azure Marketplace credentials. #
+my $clientid = "";
+my $clientsecret = "";
+
+#       ****DEPRECATED****            #
+#  Your Bing App ID                   #
 my $appid   = "";
 
-# Verbose debugging messages    #
+# Verbose debugging messages          #
 my $debug = 0;
 
-# ----------------------------- #
+# ----------------------------------- #
 
 my %AGI;
 my $text;
 my $in_lang;
 my $out_lang;
+my $timeout = 10;
 my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
 my $content = "text/plain";
 
@@ -69,7 +81,8 @@ foreach ("mstranslation", "mslang") {
 	checkresponse();
 }
 
-# Abort if there is not API key. #
+# Get access token if no AppID is defined #
+$appid = get_access_token() if (!$appid);
 die "$name No API key found. Aborting.\n" if (!$appid);
 
 # Sanitising input #
@@ -104,9 +117,8 @@ warn "$name Text passed for language detection: $text\n" if ($debug && !$out_lan
 
 # Translate text using MS Translator API #
 my $ua = LWP::UserAgent->new;
-$ua->agent("Mozilla/5.0 (X11; Linux; rv:8.0) Gecko/20100101");
 $ua->env_proxy;
-$ua->timeout(5);
+$ua->timeout($timeout);
 $text = escape($text);
 
 if ($in_lang && $out_lang) {
@@ -132,6 +144,28 @@ if ($out_lang) {
 }
 
 exit;
+
+sub get_access_token {
+# Obtaining an Access Token #
+	my $ua = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+	$ua->timeout($timeout);
+	my $response = $ua->post(
+		"https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/",
+		[
+			client_id     => $clientid,
+			client_secret => $clientsecret,
+			scope         => 'http://api.microsofttranslator.com',
+			grant_type    => 'client_credentials',
+		],
+	);
+	if ($response->is_success) {
+		$response->content =~ /^\{"access_token":"(.*?)","token_type":".*"\}$/;
+		my $token = escape("Bearer $1");
+		return("$token");
+	} else {
+		die "$name Failed to get Access Token.\n";
+	}
+}
 
 sub checkresponse {
 	my $input = <STDIN>;

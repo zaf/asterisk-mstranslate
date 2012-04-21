@@ -3,8 +3,13 @@
 #
 # Script that uses Microsoft Translator for text translation.
 #
-# In order to use this script an API Key (appid)
-# from http://www.bing.com/developers/appids.aspx is needed.
+# In order to use this script you have to subscribe to the Microsoft
+# Translator API on Azure Marketplace:
+# https://datamarket.azure.com/developer/applications/
+#
+# Existing API Keys from http://www.bing.com/developers/appids.aspx
+# still work but they are considered deprecated and this method
+# is no longer supported.
 #
 # Copyright (C) 2012, Lefteris Zafiris <zaf.000@gmail.com>
 #
@@ -19,30 +24,38 @@ use CGI::Util qw(escape);
 use LWP::UserAgent;
 
 # --------------------------------------- #
-# Here you can assign your App ID from MS #
+# Here you can assing your client ID and  #
+# client secret from Azure Marketplace.   #
+my $clientid = "";
+my $clientsecret = "";
+
+#         ****DEPRECATED****              #
+# Here you can assign your Bing App ID    #
 my $appid   = "";
+#         ****DEPRECATED****              #
 # --------------------------------------- #
+
 my %options;
 my $input;
 my $in_lang;
 my $out_lang;
-my $ua;
-my $request;
-my $response;
-my $timeout = 10;
+my $timeout = 15;
 my $content = "text/plain";
 my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
 
 VERSION_MESSAGE() if (!@ARGV);
 
-getopts('o:l:t:f:i:hqv', \%options);
+getopts('o:l:t:f:c:i:hqv', \%options);
 
 # Dislpay help messages #
 VERSION_MESSAGE() if (defined $options{h});
 
 $appid = $options{i} if (defined $options{i});
+($clientid, $clientsecret) = split(/:/, $options{c}, 2) if (defined $options{c});
+$appid = get_access_token() if (!$appid);
+
 if (!$appid) {
-	say_msg("You must have an App ID from Microsoft to use this script.");
+	say_msg("You must have a client ID from Azure Marketplace or a Bing AppID to use this script.");
 	exit 1;
 }
 
@@ -95,7 +108,7 @@ for ($input) {
 	$_ = escape($_);
 }
 
-$ua = LWP::UserAgent->new;
+my $ua = LWP::UserAgent->new;
 $ua->agent("Mozilla/5.0 (X11; Linux; rv:8.0) Gecko/20100101");
 $ua->env_proxy;
 $ua->timeout($timeout);
@@ -108,8 +121,8 @@ if ($in_lang && $out_lang) {
 	$url .= "/Detect?text=$input&appid=$appid";
 }
 
-$request = HTTP::Request->new('GET' => "$url");
-$response = $ua->request($request);
+my $request = HTTP::Request->new('GET' => "$url");
+my $response = $ua->request($request);
 if (!$response->is_success) {
 	say_msg("Failed to fetch translation data.");
 	exit 1;
@@ -119,43 +132,72 @@ if (!$response->is_success) {
 }
 exit 0;
 
-sub say_msg {
-# Print messages to user if 'quiet' flag is not set #
-	my $message = shift;
-	warn "$0: $message" if (!defined $options{q});
-	return;
-}
-
-sub VERSION_MESSAGE {
-# Help message #
-	print "Text translation using Microsoft Translator API.\n\n",
-		 "Supported options:\n",
-		 " -t <text>      text string for translation\n",
-		 " -f <file>      text file to translate\n",
-		 " -l <lang>      specify the input language (optional)\n",
-		 " -o <lang>      specify the output language\n",
-		 " -i <appID>     set the App ID from MS\n",
-		 " -q             quiet (Don't print any messages or warnings)\n",
-		 " -h             this help message\n",
-		 " -v             suppoted languages list\n\n",
-		 "Examples:\n",
-		 "$0 -o fr -t \"Hello world\"\n\tTranslate \"Hello world\" in French.\n",
-		 "$0 -t \"Salut tout le monde\"\n\tDetect the language of the text string.\n\n";
-	exit 1;
+sub get_access_token {
+# Obtaining an Access Token #
+	my $ua = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+	$ua->timeout($timeout);
+	my $response = $ua->post(
+		"https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/",
+		[
+			client_id     => $clientid,
+			client_secret => $clientsecret,
+			scope         => 'http://api.microsofttranslator.com',
+			grant_type    => 'client_credentials',
+		],
+	);
+	if ($response->is_success) {
+		$response->content =~ /^\{"access_token":"(.*?)","token_type":".*"\}$/;
+		my $token = escape("Bearer $1");
+		return("$token");
+	} else {
+		say_msg("Failed to get Access Token.");
+		return("");
+	}
 }
 
 sub lang_list {
 # Display the list of supported languages, we can translate between any two of these languages #
-	$ua = LWP::UserAgent->new;
-	$ua->agent("Mozilla/5.0 (X11; Linux; rv:8.0) Gecko/20100101");
+	my $ua = LWP::UserAgent->new;
+	$ua->env_proxy;
 	$ua->timeout($timeout);
-	$request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
-	$response = $ua->request($request);
+	my $request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
+	my $response = $ua->request($request);
 	if ($response->is_success) {
 		print "Supported languages list:\n",
 			join("\n", grep(/[a-zA-Z\-]{2,}/, split(/<.+?>/, $response->content))), "\n";
 	} else {
 		say_msg("Failed to fetch language list.");
 	}
+	exit 1;
+}
+
+sub say_msg {
+# Print messages to user if 'quiet' flag is not set #
+	my @message = @_;
+	warn @message if (!defined $options{q});
+	return;
+}
+
+sub VERSION_MESSAGE {
+# Help message #
+	print "Text translation using Microsoft Translator API.\n\n",
+		"In order to use this script you have to subscribe to the Microsoft\n",
+		"Translator API on Azure Marketplace:\n",
+		"https://datamarket.azure.com/developer/applications/\n",
+		"Existing API Keys from http://www.bing.com/developers/appids.aspx\n",
+		"still work but they are considered deprecated and this method is no longer supported.\n\n",
+		 "Supported options:\n",
+		 " -t <text>      text string for translation\n",
+		 " -f <file>      text file to translate\n",
+		 " -l <lang>      specify the input language (optional)\n",
+		 " -o <lang>      specify the output language\n",
+		 " -c <clientid>  set the Azure marketplace credentials (clientid:clientsecret)\n",
+		 " -i <appID>     set the Bing App ID\n",
+		 " -q             quiet (Don't print any messages or warnings)\n",
+		 " -h             this help message\n",
+		 " -v             suppoted languages list\n\n",
+		 "Examples:\n",
+		 "$0 -o fr -t \"Hello world\"\n\tTranslate \"Hello world\" in French.\n",
+		 "$0 -t \"Salut tout le monde\"\n\tDetect the language of the text string.\n\n";
 	exit 1;
 }
