@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Asterisk-mstranslate by zaf</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Asterisk-mstranslate</h1>
+        <p>AGI script that uses MS Translator API for text translation.</p>
+        <p class="view"><a href="https://github.com/zaf/asterisk-mstranslate">View the Project on GitHub <small>zaf/asterisk-mstranslate</small></a></p>
+        <ul>
+          <li><a href="https://github.com/zaf/asterisk-mstranslate/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zaf/asterisk-mstranslate/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zaf/asterisk-mstranslate">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1></h1>
+
+<h1>   Microsoft Translator script for Asterisk</h1>
+
+<p>This script makes use of Microsoft Translator to translate
+text strings and return them as channel variables.</p>
+
+<hr><h2>Requirements</h2>
+
+<p>Perl         The Perl Programming Language
+perl-libwww  The World-Wide Web library for Perl
+Internet access in order to contact MS and get the language data.</p>
+
+<p>In order to use this script you have to subscribe to the Microsoft
+Translator API on Azure Marketplace:
+<a href="https://datamarket.azure.com/developer/applications/">https://datamarket.azure.com/developer/applications/</a></p>
+
+<p>Existing API Keys from <a href="http://www.bing.com/developers/appids.aspx">http://www.bing.com/developers/appids.aspx</a>
+still work but they are considered deprecated and this method is no longer supported.</p>
+
+<hr><h2>Installation</h2>
+
+<p>To install copy mstrasnlate.agi to your agi-bin directory.
+Usually this is /var/lib/asterisk/agi-bin/
+To make sure check your /etc/asterisk/asterisk.conf file</p>
+
+<hr><h2>Usage</h2>
+
+<p>agi(mstranslate.agi,"text",[target language],[source language]):
+ The text string will be send to MS Translator for translation to target language.
+ The translated text will be stored as a channel variable named 'mstranslation'.
+ The setting of source language is optional, if not set the tranlator engine
+ will try to auto detect it.
+ If both target language and source language are omitted the script performs language
+ detection on the given text string and returns the two-character language code
+ as the value of the channel variable 'mslang'</p>
+
+<hr><h2>Examples</h2>
+
+<p>sample dialplan code for your extensions.conf</p>
+
+<p>;Translate a text string from english to french:
+exten =&gt; 1234,1,agi(mstranslate.agi,"This is some random text.",fr)
+exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
+
+<p>;Translate from greek to german:
+exten =&gt; 1234,1,agi(mstranslate.agi,"Αυτό είναι ένα απλό τέστ στα ελληνικά.",de)
+exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
+
+<p>;Translate from japanese to english:
+exten =&gt; 1234,1,agi(mstranslate.agi,"これは、日本の簡単なテストです。良い一日を。",en)
+exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
+
+<p>;Translate string to many languages:
+exten =&gt; 1235,1,Set(MYTEXT="This is some random text for translation.")
+exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",it)
+exten =&gt; 1235,n,Verbose(1,In Italian: ${mstranslation})</p>
+
+<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",fr)
+exten =&gt; 1235,n,Verbose(1,In French: ${mstranslation})</p>
+
+<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",ja)
+exten =&gt; 1235,n,Verbose(1,In Japanese: ${mstranslation})</p>
+
+<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",es)
+exten =&gt; 1235,n,Verbose(1,In Spanish: ${mstranslation})</p>
+
+<p>;Detect text language:
+exten =&gt; 1236,1,Set(MYTEXT="This is some random text for detection.")
+exten =&gt; 1236,n,agi(mstranslate.agi,"${MYTEXT}")
+exten =&gt; 1236,n,Verbose(1,Detected language: ${mslang})</p>
+
+<hr><h2>Supported Languages</h2>
+
+<p>Translation is possible between any two of these languages:
+ar      bg      ca
+zh-CHS      zh-CHT
+cs      da      nl
+en      et      fi
+fr      de      el
+ht      he      hi
+mww     hu      id
+it      ja      ko
+lv      lt      no
+pl      pt      ro
+ru      sk      sl
+es      sv      th
+tr      uk      vi</p>
+
+<hr><h2>License</h2>
+
+<p>The MStranslate script for asterisk is distributed under the GNU General Public
+License v2. See COPYING for details.</p>
+
+<hr><h2>Homepage</h2>
+
+<p><a href="http://zaf.github.com/asterisk-mstranslate/">http://zaf.github.com/asterisk-mstranslate/</a></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/zaf">zaf</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-10482811-8");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
