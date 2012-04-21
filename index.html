@@ -1,144 +1,185 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Asterisk-mstranslate by zaf</title>
-    
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Asterisk-mstranslate</h1>
-        <p>AGI script that uses MS Translator API for text translation.</p>
-        <p class="view"><a href="https://github.com/zaf/asterisk-mstranslate">View the Project on GitHub <small>zaf/asterisk-mstranslate</small></a></p>
-        <ul>
-          <li><a href="https://github.com/zaf/asterisk-mstranslate/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/zaf/asterisk-mstranslate/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/zaf/asterisk-mstranslate">Fork On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1></h1>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<h1>   Microsoft Translator script for Asterisk</h1>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<p>This script makes use of Microsoft Translator to translate
-text strings and return them as channel variables.</p>
+  <title>Text translation for Asterisk PBX</title>
+  <meta name="description" content=
+  "Asterisk AGI script for text translation using Microsoft Translator API." />
+  <style type="text/css">
+/*<![CDATA[*/
+    body {
+      margin-top: 1.0em;
+      background-color: #f6772f;
+      font-family: Helvetica, Arial, FreeSans, san-serif;
+      color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 750px;
+    }
+    h1 { font-size: 3.5em; color: #ffffff; margin-bottom: 3px; }
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none }
+    h2 { font-size: 1.5em; color: #ffffff; }
+    h3 { text-align: center; color: #ffffff; }
+    a { color: #ffffff; }
+    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .download { float: right; }
+    pre { background: #000; color: #fff; padding: 15px;}
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    .footer { text-align:center; padding-top:30px; font-style: italic; }
+  /*]]>*/
+  </style>
+  <script type="text/javascript">
+//<![CDATA[
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-10482811-8']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+  //]]>
+  </script>
+  <style type="text/css">
+/*<![CDATA[*/
+  img.c1 {position: absolute; top: 0; right: 0; border: 0;}
+  /*]]>*/
+  </style>
+</head>
 
-<hr><h2>Requirements</h2>
+<body>
+  <a href="https://github.com/zaf/asterisk-mstranslate"><img class="c1" src=
+  "http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt=
+  "Fork me on GitHub" /></a>
 
-<p>Perl         The Perl Programming Language
-perl-libwww  The World-Wide Web library for Perl
-Internet access in order to contact MS and get the language data.</p>
-
-<p>In order to use this script you have to subscribe to the Microsoft
-Translator API on Azure Marketplace:
-<a href="https://datamarket.azure.com/developer/applications/">https://datamarket.azure.com/developer/applications/</a></p>
-
-<p>Existing API Keys from <a href="http://www.bing.com/developers/appids.aspx">http://www.bing.com/developers/appids.aspx</a>
-still work but they are considered deprecated and this method is no longer supported.</p>
-
-<hr><h2>Installation</h2>
-
-<p>To install copy mstrasnlate.agi to your agi-bin directory.
-Usually this is /var/lib/asterisk/agi-bin/
-To make sure check your /etc/asterisk/asterisk.conf file</p>
-
-<hr><h2>Usage</h2>
-
-<p>agi(mstranslate.agi,"text",[target language],[source language]):
- The text string will be send to MS Translator for translation to target language.
- The translated text will be stored as a channel variable named 'mstranslation'.
- The setting of source language is optional, if not set the tranlator engine
- will try to auto detect it.
- If both target language and source language are omitted the script performs language
- detection on the given text string and returns the two-character language code
- as the value of the channel variable 'mslang'</p>
-
-<hr><h2>Examples</h2>
-
-<p>sample dialplan code for your extensions.conf</p>
-
-<p>;Translate a text string from english to french:
-exten =&gt; 1234,1,agi(mstranslate.agi,"This is some random text.",fr)
-exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
-
-<p>;Translate from greek to german:
-exten =&gt; 1234,1,agi(mstranslate.agi,"Αυτό είναι ένα απλό τέστ στα ελληνικά.",de)
-exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
-
-<p>;Translate from japanese to english:
-exten =&gt; 1234,1,agi(mstranslate.agi,"これは、日本の簡単なテストです。良い一日を。",en)
-exten =&gt; 1234,n,Verbose(1,Translated text: ${mstranslation})</p>
-
-<p>;Translate string to many languages:
-exten =&gt; 1235,1,Set(MYTEXT="This is some random text for translation.")
-exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",it)
-exten =&gt; 1235,n,Verbose(1,In Italian: ${mstranslation})</p>
-
-<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",fr)
-exten =&gt; 1235,n,Verbose(1,In French: ${mstranslation})</p>
-
-<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",ja)
-exten =&gt; 1235,n,Verbose(1,In Japanese: ${mstranslation})</p>
-
-<p>exten =&gt; 1235,n,agi(mstranslate.agi,"${MYTEXT}",es)
-exten =&gt; 1235,n,Verbose(1,In Spanish: ${mstranslation})</p>
-
-<p>;Detect text language:
-exten =&gt; 1236,1,Set(MYTEXT="This is some random text for detection.")
-exten =&gt; 1236,n,agi(mstranslate.agi,"${MYTEXT}")
-exten =&gt; 1236,n,Verbose(1,Detected language: ${mslang})</p>
-
-<hr><h2>Supported Languages</h2>
-
-<p>Translation is possible between any two of these languages:
-ar      bg      ca
-zh-CHS      zh-CHT
-cs      da      nl
-en      et      fi
-fr      de      el
-ht      he      hi
-mww     hu      id
-it      ja      ko
-lv      lt      no
-pl      pt      ro
-ru      sk      sl
-es      sv      th
-tr      uk      vi</p>
-
-<hr><h2>License</h2>
-
-<p>The MStranslate script for asterisk is distributed under the GNU General Public
-License v2. See COPYING for details.</p>
-
-<hr><h2>Homepage</h2>
-
-<p><a href="http://zaf.github.com/asterisk-mstranslate/">http://zaf.github.com/asterisk-mstranslate/</a></p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/zaf">zaf</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+  <div id="container">
+    <div class="download">
+      <a href="https://github.com/zaf/asterisk-mstranslate/zipball/master"><img border="0" width=
+      "90" src="https://github.com/images/modules/download/zip.png" /></a> <a href=
+      "https://github.com/zaf/asterisk-mstranslate/tarball/master"><img border="0" width="90" src=
+      "https://github.com/images/modules/download/tar.png" /></a>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-10482811-8");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
 
-  </body>
+    <h1><a href="https://github.com/zaf/asterisk-mstranslate">Text translation for
+    Asterisk</a></h1>
+
+    <div class="description">
+      Text translation and language detection for Asterisk using Microsoft Translator API.
+    </div>
+
+    <p>This script makes use of Microsoft Translator API to translate text strings and return them as channel variables.
+		See <a href="https://raw.github.com/zaf/asterisk-mstranslate/master/README">README</a> for a complete list
+    of supported languages.</p>
+
+    <h2>Dependencies</h2>
+
+    <p>Perl:        The Perl Programming Language<br />
+    perl-libwww:    The World-Wide Web library for Perl<br />
+	Internet access in order to contact Microsoft and get the language data.<br /><br />
+	In order to use this script you have to subscribe to the Microsoft
+	Translator API on <a href="https://datamarket.azure.com/developer/applications/">Azure Marketplace</a><br />
+	Existing Bing API Keys from <a href=http://www.bing.com/developers/appids.aspx>Microsoft </a>
+	still work but they are considered deprecated and this method is no longer supported.</p>
+
+    <h2>Install</h2>
+
+    <p>To install copy mstranslate.agi to your agi-bin directory.<br />
+    Usually this is /var/lib/asterisk/agi-bin/<br />
+    To make sure check your /etc/asterisk/asterisk.conf file</p>
+
+    <h2>Usage</h2>
+
+    <p><b>agi(mstranslate.agi,"text",[target language],[source language])</b>:
+	The text string will be send to Microsoft for translation to target language.
+	The translated text will be stored as a channel variable named <b>'mstranslation'</b>.
+	The setting of source language is optional, if not set the tranlator engine will try to auto detect it.
+	If both target language and source language are omitted the script performs language
+	detection on the given text string and returns the two-character language code
+	as the value of the channel variable <b>'mslang'</b>.</p>
+
+    <p>Asterisk dialplan examples:</p>
+    <pre>
+;Translate a text string from english to french:
+exten => 1234,1,agi(mstranslate.agi,"This is some random text.",fr)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+;Translate from greek to german:
+exten => 1234,1,agi(mstranslate.agi,"Αυτό είναι ένα απλό τέστ στα ελληνικά.",de)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+;Translate from japanese to english:
+exten => 1234,1,agi(mstranslate.agi,"これは、日本の簡単なテストです。良い一日を。",en)
+exten => 1234,n,Verbose(1,Translated text: ${mstranslation})
+
+</pre>
+    <pre>
+;Translate string to many languages:
+exten => 1235,1,Set(MYTEXT="This is some random text for translation.")
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",it)
+exten => 1235,n,Verbose(1,In Italian: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",fr)
+exten => 1235,n,Verbose(1,In French: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",ja)
+exten => 1235,n,Verbose(1,In Japanese: ${mstranslation})
+
+exten => 1235,n,agi(mstranslate.agi,"${MYTEXT}",es)
+exten => 1235,n,Verbose(1,In Spanish: ${mstranslation})
+
+</pre>
+    <pre>
+;Detect text language:
+exten => 1236,1,Set(MYTEXT="This is some random text for detection.")
+exten => 1236,n,agi(mstranslate.agi,"${MYTEXT}")
+exten => 1236,n,Verbose(1,Detected language: ${mslang})
+
+</pre>
+
+    <h2>License</h2>
+
+    <p>The mstranslate script for asterisk is distributed under the GNU General Public License
+    v2.</p>
+
+    <h2>Authors</h2>
+
+    <p><a href="http://github.com/zaf">Lefteris Zafiris</a> (zaf.000@gmail.com)<br /></p>
+
+    <h2>Download</h2>
+	<p>You can get the latest stable version <a href=
+    "https://github.com/downloads/zaf/asterisk-mstranslate/asterisk-mstranslate-0.2.tar.gz">here</a>.<br />
+    Develompent snapshots are available in either <a href=
+    "https://github.com/zaf/asterisk-mstranslate/zipball/master">zip</a> or <a href=
+    "https://github.com/zaf/asterisk-mstranslate/tarball/master">tar formats.</a></p><a href=
+    "https://github.com/zaf/asterisk-mstranslate/tarball/master"></a>
+
+    <p>You can also clone the project with <a href="http://git-scm.com">Git</a> by running:</p>
+    <pre>
+$ git clone git://github.com/zaf/asterisk-mstranslate
+</pre>
+
+    <h2>Links</h2>
+
+	<p><a href="http://zaf.github.com/asterisk-speech-recog/">Speech recognition for asterisk</a><br />
+    <a href="http://zaf.github.com/asterisk-googletts/">GoogleTTS text to speech script for
+    asterisk</a><br />
+	<a href="http://zaf.github.com/asterisk-googletranslate/">Text translation using Google Translate
+    API for Asterisk</a><br />
+    <a href="http://zaf.github.com/asterisk-mstts/">Speech synthesis using Microsoft Translator
+    API for Asterisk</a><br />
+    <a href="http://zaf.github.com/Asterisk-Flite/">Asterisk Flite text to speech module</a><br />
+    <a href="http://zaf.github.com/Asterisk-eSpeak/">Asterisk e-Speak text to speech module</a></p>
+
+    <div class="footer">
+      get the source code on GitHub : <a href=
+      "https://github.com/zaf/asterisk-mstranslate">zaf/asterisk-mstranslate</a>
+    </div>
+  </div>
+</body>
 </html>
