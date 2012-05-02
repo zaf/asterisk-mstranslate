@@ -104,3 +104,56 @@ Homepage
 --------
 http://zaf.github.com/asterisk-mstranslate/
 
+---------------
+API Description
+---------------
+
+Text Translation:
+Request
+-------
+GET    http://api.microsofttranslator.com/V2/Http.svc/Translate
+
+Parameters
+----------
+appId
+ Required. If the Authorization header is used, leave the appid field empty else a string
+ containing "Bearer" + " " + access token.
+
+text
+ Required. A string representing the text to translate.
+
+from
+ Optional. A string representing the language code of the translation text.
+
+to
+ Required. A string representing the language code to translate the text into.
+
+contentType
+ Required. The format of the text being translated. The supported formats are "text/plain"
+ and "text/html". Any HTML needs to be well-formed.
+
+category
+ Optional. The category of the text to translate. The only supported category is "general".
+
+Response
+--------
+A string representing the translated text.
+
+
+Language Detection:
+Request
+-------
+GET    http://api.microsofttranslator.com/V2/Http.svc/Detect
+
+Parameters
+----------
+appId
+ Required. If the Authorization header is used, leave the appid field empty else a string
+ containing "Bearer" + " " + access token.
+
+text
+ Required. A string containing some text whose language is to be identified.
+
+Response
+--------
+A string containing a two-character Language code for the given text.
