@@ -24,10 +24,8 @@
 # In order to use this script you have to subscribe to the Microsoft
 # Translator API on Azure Marketplace:
 # https://datamarket.azure.com/developer/applications/
-#
-# Existing API Keys from http://www.bing.com/developers/appids.aspx
-# still work but they are considered deprecated and this method
-# is no longer supported.
+# and register your application with Azure DataMarket:
+# https://datamarket.azure.com/developer/applications/
 #
 
 use warnings;
@@ -43,10 +41,6 @@ $| = 1;
 my $clientid = "";
 my $clientsecret = "";
 
-#       ****DEPRECATED****            #
-#  Your Bing App ID                   #
-my $appid   = "";
-
 # Verbose debugging messages          #
 my $debug = 0;
 
@@ -56,6 +50,7 @@ my %AGI;
 my $text;
 my $in_lang;
 my $out_lang;
+my $atoken;
 my $timeout = 10;
 my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
 my $content = "text/plain";
@@ -81,9 +76,9 @@ foreach ("mstranslation", "mslang") {
 	checkresponse();
 }
 
-# Get access token if no AppID is defined #
-$appid = get_access_token() if (!$appid);
-die "$name No API key found. Aborting.\n" if (!$appid);
+# Get access token #
+$atoken = get_access_token();
+die "$name No API key found. Aborting.\n" if (!$atoken);
 
 # Sanitising input #
 for ($AGI{arg_1}) {
@@ -122,11 +117,11 @@ $ua->timeout($timeout);
 $text = escape($text);
 
 if ($in_lang && $out_lang) {
-	$url .= "/Translate?text=$text&from=$in_lang&to=$out_lang&contentType=$content&appid=$appid";
+	$url .= "/Translate?text=$text&from=$in_lang&to=$out_lang&contentType=$content&appid=$atoken";
 } elsif (!$in_lang && $out_lang) {
-	$url .= "/Translate?text=$text&to=$out_lang&contentType=$content&appid=$appid";
+	$url .= "/Translate?text=$text&to=$out_lang&contentType=$content&appid=$atoken";
 } elsif (!$out_lang) {
-	$url .= "/Detect?text=$text&appid=$appid";
+	$url .= "/Detect?text=$text&appid=$atoken";
 }
 
 my $request = HTTP::Request->new('GET' => "$url");
@@ -159,7 +154,7 @@ sub get_access_token {
 		],
 	);
 	if ($response->is_success) {
-		$response->content =~ /^\{"access_token":"(.*?)","token_type":".*"\}$/;
+		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
 		my $token = escape("Bearer $1");
 		return("$token");
 	} else {

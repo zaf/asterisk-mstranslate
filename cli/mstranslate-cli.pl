@@ -3,18 +3,16 @@
 #
 # Script that uses Microsoft Translator for text translation.
 #
-# In order to use this script you have to subscribe to the Microsoft
-# Translator API on Azure Marketplace:
-# https://datamarket.azure.com/developer/applications/
-#
-# Existing API Keys from http://www.bing.com/developers/appids.aspx
-# still work but they are considered deprecated and this method
-# is no longer supported.
-#
 # Copyright (C) 2012, Lefteris Zafiris <zaf.000@gmail.com>
 #
 # This program is free software, distributed under the terms of
 # the GNU General Public License Version 2.
+#
+# In order to use this script you have to subscribe to the Microsoft
+# Translator API on Azure Marketplace:
+# https://datamarket.azure.com/developer/applications/
+# and register your application with Azure DataMarket:
+# https://datamarket.azure.com/developer/applications/
 #
 
 use warnings;
@@ -28,34 +26,29 @@ use LWP::UserAgent;
 # client secret from Azure Marketplace.   #
 my $clientid = "";
 my $clientsecret = "";
-
-#         ****DEPRECATED****              #
-# Here you can assign your Bing App ID    #
-my $appid   = "";
-#         ****DEPRECATED****              #
 # --------------------------------------- #
 
 my %options;
 my $input;
 my $in_lang;
 my $out_lang;
+my $atoken;
 my $timeout = 15;
 my $content = "text/plain";
 my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
 
 VERSION_MESSAGE() if (!@ARGV);
 
-getopts('o:l:t:f:c:i:hqv', \%options);
+getopts('o:l:t:f:c:hqv', \%options);
 
 # Dislpay help messages #
 VERSION_MESSAGE() if (defined $options{h});
 
-$appid = $options{i} if (defined $options{i});
 ($clientid, $clientsecret) = split(/:/, $options{c}, 2) if (defined $options{c});
-$appid = get_access_token() if (!$appid);
+$atoken = get_access_token();
 
-if (!$appid) {
-	say_msg("You must have a client ID from Azure Marketplace or a Bing AppID to use this script.");
+if (!$atoken) {
+	say_msg("You must have a client ID from Azure Marketplace to use this script.");
 	exit 1;
 }
 
@@ -114,11 +107,11 @@ $ua->env_proxy;
 $ua->timeout($timeout);
 
 if ($in_lang && $out_lang) {
-	$url .= "/Translate?text=$input&from=$in_lang&to=$out_lang&contentType=$content&appid=$appid";
+	$url .= "/Translate?text=$input&from=$in_lang&to=$out_lang&contentType=$content&appid=$atoken";
 } elsif (!$in_lang && $out_lang) {
-	$url .= "/Translate?text=$input&to=$out_lang&contentType=$content&appid=$appid";
+	$url .= "/Translate?text=$input&to=$out_lang&contentType=$content&appid=$atoken";
 } elsif (!$out_lang) {
-	$url .= "/Detect?text=$input&appid=$appid";
+	$url .= "/Detect?text=$input&appid=$atoken";
 }
 
 my $request = HTTP::Request->new('GET' => "$url");
@@ -146,7 +139,7 @@ sub get_access_token {
 		],
 	);
 	if ($response->is_success) {
-		$response->content =~ /^\{"access_token":"(.*?)","token_type":".*"\}$/;
+		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
 		my $token = escape("Bearer $1");
 		return("$token");
 	} else {
@@ -160,7 +153,7 @@ sub lang_list {
 	my $ua = LWP::UserAgent->new;
 	$ua->env_proxy;
 	$ua->timeout($timeout);
-	my $request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$appid");
+	my $request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$atoken");
 	my $response = $ua->request($request);
 	if ($response->is_success) {
 		print "Supported languages list:\n",
@@ -192,7 +185,6 @@ sub VERSION_MESSAGE {
 		 " -l <lang>      specify the input language (optional)\n",
 		 " -o <lang>      specify the output language\n",
 		 " -c <clientid>  set the Azure marketplace credentials (clientid:clientsecret)\n",
-		 " -i <appID>     set the Bing App ID\n",
 		 " -q             quiet (Don't print any messages or warnings)\n",
 		 " -h             this help message\n",
 		 " -v             suppoted languages list\n\n",
