@@ -107,6 +107,7 @@ API Description
 ---------------
 
 Text Translation:
+
 Request
 -------
 GET    http://api.microsofttranslator.com/V2/Http.svc/Translate
@@ -139,6 +140,7 @@ A string representing the translated text.
 
 
 Language Detection:
+
 Request
 -------
 GET    http://api.microsofttranslator.com/V2/Http.svc/Detect

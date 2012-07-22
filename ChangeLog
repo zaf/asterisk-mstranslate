@@ -1,3 +1,8 @@
+2012-07-22 Lefteris Zafiris <zaf.000@gmail.com> - 0.3
+	Removed support for Bing API id.
+	Fixed token request mechanism.
+	Documentation updates.
+
 2012-04-22 Lefteris Zafiris <zaf.000@gmail.com> - 0.2
 	Support for access token API authentication.
 	Language detection support.
