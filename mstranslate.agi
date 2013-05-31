@@ -30,7 +30,7 @@
 
 use warnings;
 use strict;
-use CGI::Util qw(escape);
+use URI::Escape;
 use LWP::UserAgent;
 $| = 1;
 
@@ -114,7 +114,7 @@ warn "$name Text passed for language detection: $text\n" if ($debug && !$out_lan
 my $ua = LWP::UserAgent->new;
 $ua->env_proxy;
 $ua->timeout($timeout);
-$text = escape($text);
+$text = uri_escape($text);
 
 if ($in_lang && $out_lang) {
 	$url .= "/Translate?text=$text&from=$in_lang&to=$out_lang&contentType=$content&appid=$atoken";
@@ -155,7 +155,7 @@ sub get_access_token {
 	);
 	if ($response->is_success) {
 		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
-		my $token = escape("Bearer $1");
+		my $token = uri_escape("Bearer $1");
 		return("$token");
 	} else {
 		die "$name Failed to get Access Token.\n";

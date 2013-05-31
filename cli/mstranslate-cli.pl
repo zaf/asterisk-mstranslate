@@ -18,7 +18,7 @@
 use warnings;
 use strict;
 use Getopt::Std;
-use CGI::Util qw(escape);
+use URI::Escape;
 use LWP::UserAgent;
 
 # --------------------------------------- #
@@ -98,7 +98,7 @@ for ($input) {
 		say_msg("No text passed for translation.");
 		exit 1;
 	}
-	$_ = escape($_);
+	$_ = uri_escape($_);
 }
 
 my $ua = LWP::UserAgent->new;
@@ -140,7 +140,7 @@ sub get_access_token {
 	);
 	if ($response->is_success) {
 		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
-		my $token = escape("Bearer $1");
+		my $token = uri_escape("Bearer $1");
 		return("$token");
 	} else {
 		say_msg("Failed to get Access Token.");
