@@ -91,6 +91,13 @@ ru		sk		sl
 es		sv		th
 tr		uk		vi
 
+-----------------------
+Security Considerations
+-----------------------
+This script contacts MS servers in order to get language and text data.
+The script can SSL to encrypt all the traffic between your pbx and MS servers
+so no 3rd party can eavesdrop your communication.
+
 -------
 License
 -------

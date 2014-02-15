@@ -41,6 +41,9 @@ $| = 1;
 my $clientid = "";
 my $clientsecret = "";
 
+# Use SSL for encryption              #
+my $use_ssl = 0;
+
 # Verbose debugging messages          #
 my $debug = 0;
 
@@ -51,8 +54,10 @@ my $text;
 my $in_lang;
 my $out_lang;
 my $atoken;
+my $url;
+my $ua;
 my $timeout = 10;
-my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
+my $host    = "api.microsofttranslator.com/V2/Http.svc";
 my $content = "text/plain";
 
 # Store AGI input #
@@ -110,13 +115,20 @@ if (length($AGI{arg_2})) {
 warn "$name Text passed for translation: $text\ntarget lang: $out_lang\n" if ($debug && $out_lang);
 warn "$name Text passed for language detection: $text\n" if ($debug && !$out_lang);
 
-# Translate text using MS Translator API #
-my $ua = LWP::UserAgent->new;
+# Initialise User angent #
+if ($use_ssl) {
+	$url = "https://" . $host;
+	$ua  = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+} else {
+	$url = "http://" . $host;
+	$ua  = LWP::UserAgent->new;
+}
 $ua->agent("Asterisk MS Translate module");
 $ua->env_proxy;
 $ua->timeout($timeout);
 $text = uri_escape($text);
 
+# Translate text using MS Translator API #
 if ($in_lang && $out_lang) {
 	$url .= "/Translate?text=$text&from=$in_lang&to=$out_lang&contentType=$content&appid=$atoken";
 } elsif (!$in_lang && $out_lang) {

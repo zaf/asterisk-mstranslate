@@ -33,13 +33,16 @@ my $input;
 my $in_lang;
 my $out_lang;
 my $atoken;
+my $url;
+my $ua;
+my $use_ssl = 0;
 my $timeout = 15;
 my $content = "text/plain";
-my $url     = "http://api.microsofttranslator.com/V2/Http.svc";
+my $host    = "api.microsofttranslator.com/V2/Http.svc";
 
 VERSION_MESSAGE() if (!@ARGV);
 
-getopts('o:l:t:f:c:hqv', \%options);
+getopts('o:l:t:f:c:hqev', \%options);
 
 # Dislpay help messages #
 VERSION_MESSAGE() if (defined $options{h});
@@ -101,7 +104,19 @@ for ($input) {
 	$_ = uri_escape($_);
 }
 
-my $ua = LWP::UserAgent->new;
+# set SSL encryption #
+if (defined $options{e}) {
+	$use_ssl = 1;
+}
+
+# Initialise User angent #
+if ($use_ssl) {
+	$url = "https://" . $host;
+	$ua  = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+} else {
+	$url = "http://" . $host;
+	$ua  = LWP::UserAgent->new;
+}
 $ua->env_proxy;
 $ua->timeout($timeout);
 
@@ -185,6 +200,7 @@ sub VERSION_MESSAGE {
 		 " -o <lang>      specify the output language\n",
 		 " -c <clientid>  set the Azure marketplace credentials (clientid:clientsecret)\n",
 		 " -q             quiet (Don't print any messages or warnings)\n",
+		 " -e             use SSL for encryption\n",
 		 " -h             this help message\n",
 		 " -v             suppoted languages list\n\n",
 		 "Examples:\n",
