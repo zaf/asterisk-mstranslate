@@ -140,9 +140,9 @@ exit 0;
 
 sub get_access_token {
 # Obtaining an Access Token #
-	my $ua = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
-	$ua->timeout($timeout);
-	my $response = $ua->post(
+	my $tk_ua = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+	$tk_ua->timeout($timeout);
+	my $response = $tk_ua->post(
 		"https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/",
 		[
 			client_id     => $clientid,
