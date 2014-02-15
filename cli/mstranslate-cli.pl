@@ -54,6 +54,10 @@ if (!$atoken) {
 	say_msg("You must have a client ID from Azure Marketplace to use this script.");
 	exit 1;
 }
+# set SSL encryption #
+if (defined $options{e}) {
+	$use_ssl = 1;
+}
 
 lang_list() if (defined $options{v});
 
@@ -102,11 +106,6 @@ for ($input) {
 		exit 1;
 	}
 	$_ = uri_escape($_);
-}
-
-# set SSL encryption #
-if (defined $options{e}) {
-	$use_ssl = 1;
 }
 
 # Initialise User angent #
@@ -164,7 +163,13 @@ sub get_access_token {
 
 sub lang_list {
 # Display the list of supported languages, we can translate between any two of these languages #
-	my $ua = LWP::UserAgent->new;
+	if ($use_ssl) {
+		$url = "https://" . $host;
+		$ua  = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1});
+	} else {
+		$url = "http://" . $host;
+		$ua  = LWP::UserAgent->new;
+	}
 	$ua->env_proxy;
 	$ua->timeout($timeout);
 	my $request = HTTP::Request->new('GET' => "$url/GetLanguagesForTranslate?appid=$atoken");
