@@ -112,7 +112,7 @@ warn "$name Text passed for language detection: $text\n" if ($debug && !$out_lan
 
 # Translate text using MS Translator API #
 my $ua = LWP::UserAgent->new;
-$ua->agent("Asterisk MS Trnaslate module");
+$ua->agent("Asterisk MS Translate module");
 $ua->env_proxy;
 $ua->timeout($timeout);
 $text = uri_escape($text);
