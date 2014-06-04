@@ -133,7 +133,7 @@ if (!$response->is_success) {
 	say_msg("Failed to fetch translation data.");
 	exit 1;
 } else {
-	$response->content =~ /<string.*>(.*)<\/string>/;
+	$response->content =~ /<string.*?>(.*?)<\/string>/;
 	print "$1\n";
 }
 exit 0;
@@ -152,7 +152,7 @@ sub get_access_token {
 		],
 	);
 	if ($response->is_success) {
-		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
+		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*?","scope":".*?"\}$/;
 		my $token = uri_escape("Bearer $1");
 		return("$token");
 	} else {

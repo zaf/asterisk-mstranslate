@@ -141,7 +141,7 @@ my $request = HTTP::Request->new('GET' => "$url");
 my $response = $ua->request($request);
 die "$name Failed to fetch file.\n" if (!$response->is_success);
 # export resulted text to channel variable #
-$response->content =~ /<string.*>(.*)<\/string>/;
+$response->content =~ /<string.*?>(.*?)<\/string>/;
 
 if ($out_lang) {
 	print "SET VARIABLE \"mstranslation\" \"$1\"\n";
@@ -167,7 +167,7 @@ sub get_access_token {
 		],
 	);
 	if ($response->is_success) {
-		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*","scope":".*"\}$/;
+		$response->content =~ /^\{"token_type":".*","access_token":"(.*?)","expires_in":".*?","scope":".*?"\}$/;
 		my $token = uri_escape("Bearer $1");
 		return("$token");
 	} else {
