@@ -32,6 +32,7 @@ use warnings;
 use strict;
 use URI::Escape;
 use LWP::UserAgent;
+use Encode qw(encode decode);
 $| = 1;
 
 # ----------------------------------- #
@@ -70,11 +71,6 @@ while (<STDIN>) {
 
 my $name = " -- $AGI{request}:";
 
-#if ($debug) {
-#	warn "$name AGI Environment Dump:\n";
-#	warn "$name $_ = $AGI{$_}\n" foreach (sort keys %AGI);
-#}
-
 # Reset channel variable. #
 foreach ("mstranslation", "mslang") {
 	print "SET VARIABLE \"$_\" \"-1\"\n";
@@ -86,6 +82,7 @@ $atoken = get_access_token();
 die "$name No API key found. Aborting.\n" if (!$atoken);
 
 # Sanitising input #
+$AGI{arg_1} = decode('utf8', $AGI{arg_1});
 for ($AGI{arg_1}) {
 	s/[\\|*~<>^\(\)\[\]\{\}[:cntrl:]]/ /g;
 	s/\s+/ /g;
@@ -93,6 +90,7 @@ for ($AGI{arg_1}) {
 	die "$name No text passed. Aborting\n" if (!length);
 	$text = $_;
 }
+$text = encode('utf8', $text);
 
 # Setting source and target language  #
 if (length($AGI{arg_2})) {
@@ -144,7 +142,8 @@ die "$name Failed to fetch file.\n" if (!$response->is_success);
 $response->content =~ /<string.*?>(.*?)<\/string>/;
 
 if ($out_lang) {
-	print "SET VARIABLE \"mstranslation\" \"$1\"\n";
+	my $trans = encode('utf8', $1);
+	print "SET VARIABLE \"mstranslation\" \"$trans\"\n";
 	checkresponse();
 } else {
 	print "SET VARIABLE \"mslang\" \"$1\"\n";
