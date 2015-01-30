@@ -43,7 +43,7 @@ my $clientid = "";
 my $clientsecret = "";
 
 # Use SSL for encryption              #
-my $use_ssl = 0;
+my $use_ssl = 1;
 
 # Verbose debugging messages          #
 my $debug = 0;
